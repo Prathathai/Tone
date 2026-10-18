@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FAH Tone Studio – ปรับโทนรูปทีละ 10 รูป</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Mr+Dafoe&family=Yellowtail&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf6f4;--card:#fff;--ink:#2b2528;--mute:#8a7f84;--line:#eadfe0;--acc:#d9607a;--on:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#18141a;--card:#231d26;--ink:#f3ecef;--mute:#a597a0;--line:#382f3b;--acc:#ef7f98;--on:#2b1520}}
+:root[data-theme="dark"]{--bg:#18141a;--card:#231d26;--ink:#f3ecef;--mute:#a597a0;--line:#382f3b;--acc:#ef7f98;--on:#2b1520}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Prompt",system-ui,sans-serif;line-height:1.5}
+main{max-width:980px;margin:0 auto;padding:16px 14px 90px}
+h1{font-family:"Mr Dafoe",cursive;font-weight:400;font-size:44px;margin:6px 0 0;color:var(--acc);line-height:1.1}
+.sub{color:var(--mute);margin:0 0 16px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;font-weight:600}
+.step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--acc);color:var(--on);font-size:12px;margin-right:6px}
+#drop{border:2px dashed var(--line);border-radius:14px;padding:22px 12px;text-align:center;cursor:pointer;display:block;color:var(--mute);transition:.15s}
+#drop.over{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,transparent)}
+#drop b{color:var(--ink);display:block;font-size:16px}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.pr{border:2px solid transparent;background:none;padding:0;cursor:pointer;color:var(--ink);font:inherit;font-size:12px;text-align:center}
+.pr i{display:block;height:46px;border-radius:10px;margin-bottom:4px;border:1px solid var(--line)}
+.pr.on{border-color:var(--acc);border-radius:12px}
+textarea{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px;font:inherit;font-size:14px;resize:vertical;min-height:54px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer}
+.tag{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--ink);border-radius:99px;padding:2px 9px;font-size:12px}
+#understood{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--mute);min-height:22px}
+.row{display:grid;grid-template-columns:96px 1fr 34px;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.row output{text-align:right;color:var(--mute);font-size:12px}
+input[type=range]{width:100%;accent-color:var(--acc)}
+details summary{cursor:pointer;font-size:13px;color:var(--mute);margin-top:6px}
+select{font:inherit;font-size:13px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+label.sw{display:flex;gap:8px;align-items:center;font-size:14px}
+.opts{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px}
+button.pri{background:var(--acc);color:var(--on);border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:500;cursor:pointer}
+button.pri:disabled{opacity:.5;cursor:default}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.ph{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.ph canvas{width:100%;display:block;touch-action:manipulation;cursor:pointer;-webkit-user-select:none;user-select:none}
+.ph .bar{display:flex;gap:6px;align-items:center;padding:6px 8px;font-size:11px;color:var(--mute)}
+.ph .bar span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;justify-content:center;z-index:5}
+#msg{font-size:12px;color:var(--mute)}
+main{display:flex;flex-direction:column}
+#more{order:2}#wm{order:3}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.tonebar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;padding:10px 12px;box-shadow:0 8px 14px -10px rgba(0,0,0,.3)}
+.presets{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.presets .pr{flex:none;width:68px;padding:2px;font-size:11px;border-radius:12px}
+.presets .pr i{height:34px}
+#txt{min-height:38px;resize:none;margin-top:4px}
+#understood:empty{display:none}
+#understood{margin-top:6px}
+.chip.on{background:var(--acc);color:var(--on);border-color:var(--acc)}
+#grid.drag canvas{touch-action:none;cursor:grab}
+.dock{flex-wrap:wrap}
+#viewer{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 30px}
+#viewer[hidden]{display:none}
+.vbar{position:sticky;top:0;z-index:2;display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--bg);padding:6px 0 10px;font-size:14px}
+#vlist img{width:100%;display:block;border-radius:10px;margin:0 0 14px;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+.empty{color:var(--mute);font-size:13px;text-align:center;padding:14px}
+</style>
+</head>
+<body>
+<main>
+  <h1>FAH Tone Studio</h1>
+  <p class="sub">ปรับโทนสีอย่างเดียว ขนาดและเนื้อหารูปคงเดิม 100% · ทำทีละไม่เกิน 10 รูป · ประมวลผลในเครื่อง ไม่อัปโหลดไปไหน</p>
+
+  <section class="card">
+    <h2><span class="step">1</span>เลือกรูป (<span id="count">0</span>/10)</h2>
+    <label id="drop" for="file"><b>แตะเพื่อเลือกรูป หรือลากมาวางที่นี่</b>JPG · PNG · WebP</label>
+    <input id="file" type="file" accept="image/*" multiple hidden>
+  </section>
+
+  <section class="card tonebar" id="tone">
+    <div class="presets" id="presets"></div>
+    <div class="opts" style="margin:2px 0;gap:4px 14px"><label class="sw" style="font-size:12px;flex:1 1 170px">ความแรง<input type="range" id="k" min="0" max="150" value="100"><output id="kv" style="font-size:12px;color:var(--mute);min-width:36px">100%</output></label><label class="sw" style="font-size:13px"><input type="checkbox" id="wmOn" checked>ลายน้ำ FAH</label><label class="sw" style="font-size:13px"><input type="checkbox" id="fxOn">โฟกัสคน</label></div>
+
+    <textarea id="txt" rows="1" placeholder="เช่น อุ่นนุ่มๆ สว่างขึ้นนิดหน่อย ผิวใส / ฟิล์มวินเทจ ซีดๆ / cool tone, more contrast"></textarea>
+    <div id="understood"></div>
+  </section>
+
+  <section class="card" id="more">
+    <h2>คำสั่งลัด และปรับละเอียด</h2>
+    <div class="chips" id="quick"></div>
+    <h2 style="margin:12px 0 6px">โฟกัสคน (ติ๊กเปิดที่แถบด้านบน)</h2>
+    <div class="row"><span>เบลอฉากหลัง</span><input type="range" id="fxB" min="0" max="100" value="55"><output>55</output></div>
+    <div class="row"><span>ขนาดจุดโฟกัส</span><input type="range" id="fxS" min="25" max="100" value="70"><output>70</output></div>
+    <div class="row"><span>คมชัดตัวคน</span><input type="range" id="fxP" min="0" max="100" value="50"><output>50</output></div>
+    <p class="sub" style="margin:4px 0 10px">ระบบไม่ได้ตรวจจับคนอัตโนมัติ ให้ลากจุดโฟกัสไปที่ตัวคนเอง (โหมด “ย้ายจุดโฟกัส” ตรงหัวข้อผลลัพธ์) ตัวคนจะคมชัด ฉากหลังค่อยๆ เบลอเหมือนกล้องเลนส์รูรับแสงกว้าง</p>
+
+    <details><summary>ปรับละเอียดด้วยตัวเอง</summary>
+      <div id="sliders"></div>
+      <button class="ghost" id="resetM" style="margin-top:6px">รีเซ็ตสไลเดอร์</button>
+    </details>
+  </section>
+
+  <section class="card" id="wm">
+    <h2>ลายน้ำ FAH และไฟล์</h2>
+    <div class="chips" id="wmPos"></div>
+    <p class="sub" style="margin:0 0 6px">กดเลือกตำแหน่งสำเร็จรูป หรือใช้โหมด “ย้ายลายน้ำ” ที่หัวข้อผลลัพธ์แล้วลากบนรูปเอง</p>
+    <div class="opts" id="wmOpts">
+      <select id="wmFont"><option>Mr Dafoe</option><option>Yellowtail</option><option>Mrs Saint Delafield</option></select>
+      <label class="sw">ขนาด <input type="range" id="wmSize" min="50" max="160" value="100" style="width:90px"></label>
+      <label class="sw">ความจาง <input type="range" id="wmOp" min="30" max="100" value="90" style="width:90px"></label>
+    </div>
+    <div class="opts"><label class="sw">ไฟล์ที่ได้ <select id="fmt"><option value="jpg">JPG (เล็ก ใช้ง่าย)</option><option value="png">PNG (ไม่สูญเสีย)</option></select></label></div>
+  </section>
+
+  <section class="card" id="res">
+    <h2>ผลลัพธ์</h2>
+    <div class="chips" id="modes"></div>
+    <div id="modeHint" class="sub" style="margin:0 0 10px"></div>
+    <div id="grid"></div>
+    <div class="empty" id="empty">ยังไม่มีรูป</div>
+  </section>
+</main>
+
+<div id="viewer" hidden><div class="vbar"><b>แตะรูปค้างไว้ → “บันทึกรูปภาพ” หรือกดปุ่มด้านล่าง</b><button class="ghost" id="vclose">ปิด</button></div><button class="pri" id="share" hidden style="width:100%;margin-bottom:12px">📲 บันทึกทุกรูปลงอัลบั้ม</button><div id="vlist"></div></div>
+
+<div class="dock">
+  <span id="msg"></span>
+  <button class="ghost" id="clear">เริ่มรอบใหม่</button>
+  <button class="ghost" id="peek">👆 กดค้างเซฟ</button>
+  <button class="pri" id="zip" disabled>ดาวน์โหลดทั้งหมด (ZIP)</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const MAX = 10;
+const PRESETS = [
+ {id:"orig", n:"ต้นฉบับ", g:"linear-gradient(135deg,#ccc,#eee)", p:{}},
+ {id:"nat", n:"ใสธรรมชาติ", g:"linear-gradient(135deg,#9fd3c7,#f6efc9)", p:{e:8,c:6,s:8}},
+ {id:"kr", n:"เกาหลีใส", g:"linear-gradient(135deg,#e9f3ff,#ffeef2)", p:{e:20,c:-8,s:-6,w:-4,f:8,h:-10}},
+ {id:"cream", n:"ครีมอุ่น", g:"linear-gradient(135deg,#f7e3c4,#f0c9a0)", p:{e:8,c:-4,s:-8,w:22,f:10,t:4}},
+ {id:"film", n:"ฟิล์มวินเทจ", g:"linear-gradient(135deg,#5f8a86,#e6c58f)", p:{c:8,s:-14,w:14,f:26,sa:.25,sc:[30,140,150],ha:.2,hc:[255,175,90]}},
+ {id:"gold", n:"โกลเดนอาวร์", g:"linear-gradient(135deg,#ffb347,#ff7e5f)", p:{e:4,c:10,s:14,w:34,h:-8,ha:.25,hc:[255,170,70]}},
+ {id:"cool", n:"มินิมอลเย็น", g:"linear-gradient(135deg,#dfe8f2,#b9c9dc)", p:{e:10,s:-22,w:-20,f:10}},
+ {id:"moody", n:"มูดดี้เข้ม", g:"linear-gradient(135deg,#2c3e4a,#6b5a52)", p:{e:-14,c:22,s:-10,w:-4,sa:.3,sc:[30,120,140]}},
+ {id:"teal", n:"ทีล & ออเรนจ์", g:"linear-gradient(135deg,#1f7a8c,#f2994a)", p:{c:14,s:8,sa:.4,sc:[20,130,150],ha:.35,hc:[255,160,70]}},
+ {id:"pastel", n:"พาสเทลหวาน", g:"linear-gradient(135deg,#ffd6e8,#cde7ff)", p:{e:14,c:-14,s:-6,f:20,t:8,w:4}},
+ {id:"matcha", n:"มัทฉะนุ่ม", g:"linear-gradient(135deg,#b7d3a8,#e8ecc8)", p:{e:4,s:-10,w:6,t:-14,f:14}},
+ {id:"vivid", n:"สีสดใส", g:"linear-gradient(135deg,#ff5e8a,#ffd23f,#3ec6e0)", p:{e:4,c:10,s:34}},
+ {id:"pink", n:"ชมพูซันเซ็ต", g:"linear-gradient(135deg,#ff9fb5,#ffc8a2)", p:{w:12,t:16,s:8,ha:.25,hc:[255,150,170]}},
+ {id:"bw", n:"ขาวดำคลาสสิก", g:"linear-gradient(135deg,#111,#eee)", p:{m:1,c:16}}
+];
+const SL = [["e","ความสว่าง",-100,100],["c","คอนทราสต์",-60,60],["s","ความสดของสี",-100,100],["w","อุ่น ↔ เย็น",-60,60],["t","เขียว ↔ ชมพู",-60,60],["f","ซีดแบบฟิล์ม",0,60]];
+const KW = [
+ [/ขาวดำ|bw|mono|black ?and ?white/i,"ขาวดำ",{m:1,c:10}],
+ [/ผิวขาว|ผิวใส|ขาวใส|หน้าใส|skin/i,"ผิวใส",{e:14,s:-6,w:4}],
+ [/ฟิล์ม|film|vintage|วินเทจ|เรโทร|retro/i,"ฟิล์ม",{f:24,s:-12,w:12,sa:.2,sc:[30,140,150],ha:.18,hc:[255,175,90]}],
+ [/มู้ดดี้|มูดดี้|moody|เข้มๆ|ดาร์ก/i,"มูดดี้",{e:-10,c:18,s:-8,sa:.25,sc:[30,120,140]}],
+ [/พาสเทล|pastel|ละมุน|หวาน/i,"พาสเทล",{e:10,c:-14,s:-10,f:16,t:6}],
+ [/ซีด|จาง|หม่น|muted|desat/i,"ซีด/หม่น",{s:-24,f:12}],
+ [/สดใส|สด|จัด|vivid|vibrant|saturat/i,"สีสด",{s:28,e:3}],
+ [/คอนทราสต์|contrast|คมๆ|เข้มข้น/i,"คอนทราสต์",{c:20}],
+ [/นุ่ม|soft/i,"นุ่ม",{c:-14,f:10,e:6}],
+ [/อุ่น|warm|ส้ม|ทอง|golden|แดด/i,"อุ่น",{w:24}],
+ [/เย็น|cool|ฟ้า|หนาว/i,"เย็น",{w:-24}],
+ [/เขียว|green|มัทฉะ|ธรรมชาติ/i,"เขียว",{t:-18}],
+ [/ชมพู|pink|magenta|ซากุระ/i,"ชมพู",{t:18,w:4}],
+ [/มืด|ทึม|dark|darker/i,"มืดลง",{e:-14,c:8}],
+ [/สว่าง|ใส|bright|clear|light/i,"สว่าง",{e:14}]
+];
+const QUICK = ["สว่างใสขึ้น","อุ่นนุ่มๆ","ฟิล์มวินเทจ","ผิวใส โทนเย็น","สดขึ้นมาก","ซีดหม่นนิดหน่อย","moody","ขาวดำ"];
+
+const $ = id => document.getElementById(id);
+let mode = "view", wmX = .88, wmY = .07;
+let items = [], preset = "nat", k = 1, manual = {e:0,c:0,s:0,w:0,t:0,f:0}, textD = {}, dl = null, raf = 0;
+
+/* ---------- tone parameters ---------- */
+function eff(){
+  const o = {e:0,c:0,s:0,w:0,t:0,f:0,h:0,sh:0,m:0,sa:0,sc:[0,0,0],ha:0,hc:[0,0,0]};
+  const P = PRESETS.find(p => p.id === preset).p;
+  const sc = {}; for (const key in P) sc[key] = Array.isArray(P[key]) ? P[key] : P[key] * k;
+  for (const src of [sc, textD, manual]) for (const key in src) {
+    if (Array.isArray(src[key])) o[key] = src[key]; else o[key] += src[key];
+  }
+  return o;
+}
+function parseText(t){
+  textD = {}; const tags = [];
+  let mul = 1;
+  if (/มาก|เยอะ|หนัก|very|more|strong/i.test(t)) mul = 1.5;
+  if (/นิด|เล็กน้อย|เบา|slight|little|subtle/i.test(t)) mul = 0.5;
+  for (const [re, name, d] of KW) {
+    if (re.test(t)) {
+      t = t.replace(re, " "); tags.push(name);
+      for (const key in d) {
+        if (Array.isArray(d[key])) textD[key] = d[key];
+        else textD[key] = (textD[key] || 0) + d[key] * mul;
+      }
+    }
+  }
+  const u = $("understood");
+  u.innerHTML = "";
+  if (tags.length) {
+    u.append("ระบบเข้าใจ: ");
+    tags.forEach(x => { const s = document.createElement("span"); s.className = "tag"; s.textContent = x + (mul !== 1 ? " ×" + mul : ""); u.append(s); });
+  } else if ($("txt").value.trim()) u.textContent = "ยังไม่เข้าใจคำสั่งนี้ ลองใช้คำเช่น อุ่น เย็น สว่าง มืด สด ซีด ฟิล์ม ขาวดำ";
+}
+
+/* ---------- pixel processing (tone only, size unchanged) ---------- */
+function process(cv, p){
+  const ctx = cv.getContext("2d", {willReadFrequently:true});
+  const img = ctx.getImageData(0, 0, cv.width, cv.height), d = img.data;
+  const ex = Math.pow(2, p.e / 100 * 1.2), ct = 1 + p.c / 100, f = Math.max(0, p.f) / 100;
+  const off = [p.w / 100 * 0.09, -p.t / 100 * 0.07, -p.w / 100 * 0.09];
+  const L = [0,1,2].map(() => new Uint8ClampedArray(256));
+  const cl = v => Math.min(1, Math.max(0, v));
+  for (let ch = 0; ch < 3; ch++) for (let i = 0; i < 256; i++) {
+    let x = i / 255 * ex;
+    x = (x - .5) * ct + .5;
+    x += p.sh / 100 * .25 * Math.pow(1 - cl(x), 2);
+    x += p.h / 100 * .25 * Math.pow(cl(x), 2);
+    x = f * .10 + x * (1 - f * .16);
+    L[ch][i] = (x + off[ch]) * 255;
+  }
+  const s = 1 + p.s / 100, m = cl(p.m), sa = p.sa, ha = p.ha, sc = p.sc, hc = p.hc;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = L[0][d[i]], g = L[1][d[i+1]], b = L[2][d[i+2]];
+    const l = .299 * r + .587 * g + .114 * b;
+    let R = l + (r - l) * s, G = l + (g - l) * s, B = l + (b - l) * s;
+    if (m > 0) { R += (l - R) * m; G += (l - G) * m; B += (l - B) * m; }
+    if (sa || ha) {
+      const t = l / 255, ws = (1 - t) * (1 - t) * sa * .6, wh = t * t * ha * .6;
+      R += (sc[0] - 128) * ws + (hc[0] - 128) * wh;
+      G += (sc[1] - 128) * ws + (hc[1] - 128) * wh;
+      B += (sc[2] - 128) * ws + (hc[2] - 128) * wh;
+    }
+    d[i] = R; d[i+1] = G; d[i+2] = B;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+/* ---------- watermark ---------- */
+const wmFont = () => $("wmFont").value;
+const fontReady = () => document.fonts.load('64px "' + wmFont() + '"', "FAH").catch(() => {});
+function drawWM(ctx, w, h){
+  if (!$("wmOn").checked) return;
+  const fs = w * 0.07 * $("wmSize").value / 100;
+  ctx.save();
+  ctx.font = fs + 'px "' + wmFont() + '", cursive';
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.globalAlpha = $("wmOp").value / 100;
+  ctx.fillStyle = "#fff";
+  ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = fs * 0.12;
+  const tx = Math.min(w - fs, Math.max(fs, wmX * w)), ty = Math.min(h - fs * .7, Math.max(fs * .7, wmY * h));
+  ctx.fillText("FAH", tx, ty);
+  ctx.restore();
+}
+
+/* ---------- focus on subject: blurred background + sharp subject ---------- */
+function boxBlur(d, w, h, r){
+  const t = new Uint8ClampedArray(d.length); t.set(d);
+  const pass = (s, o, n, st, cnt, ls) => {
+    const dv = 2 * r + 1;
+    for (let l = 0; l < cnt; l++) { const b = l * ls;
+      for (let c = 0; c < 3; c++) {
+        let sum = 0;
+        for (let i = -r; i <= r; i++) sum += s[b + Math.min(n - 1, Math.max(0, i)) * st + c];
+        for (let i = 0; i < n; i++) {
+          o[b + i * st + c] = sum / dv;
+          sum += s[b + Math.min(n - 1, i + r + 1) * st + c] - s[b + Math.max(0, i - r) * st + c];
+        }
+      }
+    }
+  };
+  for (let n = 0; n < 3; n++) { pass(d, t, w, 4, h, w * 4); pass(t, d, h, w * 4, w, 4); }
+}
+function blurLayers(cv, F, b){
+  const w = cv.width, h = cv.height, s = Math.min(1, 400 / Math.max(w, h));
+  const sw = Math.max(2, Math.round(w * s)), sh = Math.max(2, Math.round(h * s));
+  const sm = document.createElement("canvas"); sm.width = sw; sm.height = sh;
+  const sx = sm.getContext("2d", {willReadFrequently:true}); sx.imageSmoothingQuality = "high"; sx.drawImage(cv, 0, 0, sw, sh);
+  const base = sx.getImageData(0, 0, sw, sh).data;
+  const L = document.createElement("canvas"); L.width = w; L.height = h;
+  const lx = L.getContext("2d"); lx.imageSmoothingQuality = "high";
+  const ctx = cv.getContext("2d");
+  [[1, 1], [2.2, 1.7]].forEach(([mul, ext]) => {
+    const im = new ImageData(new Uint8ClampedArray(base), sw, sh);
+    boxBlur(im.data, sw, sh, Math.max(1, Math.round((1 + b * 12) * mul)));
+    sx.putImageData(im, 0, 0);
+    lx.clearRect(0, 0, w, h); lx.drawImage(sm, 0, 0, w, h);
+    lx.save(); lx.globalCompositeOperation = "destination-out";
+    lx.translate(F.cx, F.cy); lx.scale(F.rx * ext, F.ry * ext);
+    const g = lx.createRadialGradient(0, 0, 0, 0, 0, 1);
+    g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(.55, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
+    lx.fillStyle = g; lx.fillRect(-1e3, -1e3, 2e3, 2e3); lx.restore();
+    ctx.drawImage(L, 0, 0);
+  });
+  L.width = L.height = sm.width = sm.height = 0;
+}
+function sharpen(cv, F, amt){
+  const w = cv.width, h = cv.height, ctx = cv.getContext("2d", {willReadFrequently:true});
+  const x0 = Math.max(0, Math.floor(F.cx - F.rx)), x1 = Math.min(w, Math.ceil(F.cx + F.rx));
+  const y0 = Math.max(0, Math.floor(F.cy - F.ry)), y1 = Math.min(h, Math.ceil(F.cy + F.ry));
+  const rw = x1 - x0, rh = y1 - y0; if (rw < 8 || rh < 8) return;
+  const img = ctx.getImageData(x0, y0, rw, rh), o = img.data, s = new Uint8ClampedArray(o);
+  const q = Math.max(1, Math.round(Math.max(w, h) / 1400)), k = amt / 100 * .55;
+  for (let y = q; y < rh - q; y++) {
+    const ny = (y + y0 - F.cy) / F.ry;
+    for (let x = q; x < rw - q; x++) {
+      const nx = (x + x0 - F.cx) / F.rx, d2 = nx * nx + ny * ny; if (d2 >= 1) continue;
+      let wg = 1 - Math.min(1, Math.max(0, (Math.sqrt(d2) - .35) / .65)); wg = wg * wg * (3 - 2 * wg);
+      const i = (y * rw + x) * 4, kk = k * wg;
+      for (let c = 0; c < 3; c++) {
+        const v = s[i + c];
+        o[i + c] = v + kk * (4 * v - s[i - 4 * q + c] - s[i + 4 * q + c] - s[i - rw * 4 * q + c] - s[i + rw * 4 * q + c]);
+      }
+    }
+  }
+  ctx.putImageData(img, x0, y0);
+}
+function focusBox(cv, it){
+  const w = cv.width, h = cv.height, m = Math.min(w, h), sz = $("fxS").value / 100;
+  return {cx: it.fx * w, cy: it.fy * h, rx: .6 * m * sz, ry: .9 * m * sz};
+}
+function applyFocus(cv, it){
+  if (!$("fxOn").checked) return;
+  const F = focusBox(cv, it), b = $("fxB").value / 100, sp = +$("fxP").value;
+  if (b > 0) blurLayers(cv, F, b);
+  if (sp > 0) sharpen(cv, F, sp);
+}
+function ring(ctx, cv, it){
+  if (!$("fxOn").checked) return;
+  const F = focusBox(cv, it);
+  ctx.save(); ctx.strokeStyle = "rgba(255,255,255,.95)"; ctx.fillStyle = "rgba(255,255,255,.95)"; ctx.lineWidth = 2; ctx.setLineDash([7, 5]);
+  ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 3;
+  ctx.beginPath(); ctx.ellipse(F.cx, F.cy, F.rx * .55, F.ry * .55, 0, 0, 7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(F.cx, F.cy, 4, 0, 7); ctx.fill(); ctx.restore();
+}
+
+/* ---------- preview ---------- */
+function drawCard(it){
+  const cv = it.cv, ctx = cv.getContext("2d", {willReadFrequently:true});
+  ctx.drawImage(it.sm, 0, 0);
+  if (!it.hold) { process(cv, eff()); applyFocus(cv, it); drawWM(ctx, cv.width, cv.height); if (mode === "focus") ring(ctx, cv, it); }
+}
+function renderAll(){ cancelAnimationFrame(raf); raf = requestAnimationFrame(() => items.forEach(drawCard)); }
+
+function refreshUI(){
+  $("count").textContent = items.length;
+  $("empty").style.display = items.length ? "none" : "block";
+  $("zip").disabled = !items.length;
+}
+
+async function addFiles(list){
+  const imgs = [...list].filter(f => f.type.startsWith("image/"));
+  const room = MAX - items.length;
+  if (imgs.length > room) say("รับได้สูงสุด " + MAX + " รูปต่อรอบ ใช้ " + Math.max(room, 0) + " รูปแรก");
+  await fontReady();
+  for (const f of imgs.slice(0, Math.max(room, 0))) {
+    try {
+      const bmp = await createImageBitmap(f);
+      const sc = Math.min(1, 720 / Math.max(bmp.width, bmp.height));
+      const sm = document.createElement("canvas");
+      sm.width = Math.round(bmp.width * sc); sm.height = Math.round(bmp.height * sc);
+      sm.getContext("2d").drawImage(bmp, 0, 0, sm.width, sm.height);
+      const it = {name: f.name.replace(/\.[^.]+$/, ""), bmp, sm, hold:false, fx:.5, fy:.42};
+      const box = document.createElement("div"); box.className = "ph";
+      const cv = document.createElement("canvas"); cv.width = sm.width; cv.height = sm.height; it.cv = cv;
+      const bar = document.createElement("div"); bar.className = "bar";
+      const nm = document.createElement("span"); nm.textContent = it.name;
+      const b1 = document.createElement("button"); b1.className = "ghost"; b1.textContent = "โหลด";
+      const b2 = document.createElement("button"); b2.className = "ghost"; b2.textContent = "✕";
+      bar.append(nm, b1, b2); box.append(cv, bar); $("grid").append(box); it.box = box;
+      const set = v => { it.hold = v; drawCard(it); };
+      let drag = false;
+      const move = e => { const r = cv.getBoundingClientRect(), x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)); if (mode === "wm") { wmX = x; wmY = y; renderAll(); } else { it.fx = x; it.fy = y; drawCard(it); } };
+      cv.addEventListener("pointerdown", e => { if (mode === "view") return set(true); drag = true; cv.setPointerCapture(e.pointerId); move(e); });
+      cv.addEventListener("pointermove", e => { if (drag) move(e); });
+      ["pointerup","pointerleave","pointercancel"].forEach(ev => cv.addEventListener(ev, () => { drag = false; if (it.hold) set(false); }));
+      b1.onclick = () => saveOne(it);
+      b2.onclick = () => { items = items.filter(x => x !== it); box.remove(); refreshUI(); };
+      items.push(it); drawCard(it); refreshUI();
+    } catch (e) { say("เปิดไฟล์ " + f.name + " ไม่ได้"); }
+  }
+}
+
+/* ---------- export (full resolution) ---------- */
+async function exportFull(it){
+  const w = it.bmp.width, h = it.bmp.height;
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const ctx = cv.getContext("2d", {willReadFrequently:true});
+  ctx.drawImage(it.bmp, 0, 0);
+  process(cv, eff());
+  applyFocus(cv, it); await fontReady(); drawWM(ctx, w, h);
+  const png = $("fmt").value === "png";
+  const blob = await new Promise(r => cv.toBlob(r, png ? "image/png" : "image/jpeg", .95));
+  cv.width = cv.height = 0;
+  return {blob, ext: png ? "png" : "jpg"};
+}
+async function save(filename, data){
+  if (!dl) { const u = URL.createObjectURL(data), a = document.createElement("a"); a.href = u; a.download = filename; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000); return true; }
+  try { await dl.save({filename, data}); return true; }
+  catch (e) { if (e && e.code !== "declined") say("บันทึกไม่สำเร็จ (" + (e.code || "error") + ")"); return false; }
+}
+async function saveOne(it){
+  say("กำลังประมวลผล…");
+  const {blob, ext} = await exportFull(it);
+  if (await save(it.name + "-FAH." + ext, blob)) say("บันทึกแล้ว ✓"); else if (!$("msg").textContent.includes("ไม่")) say("");
+}
+async function saveZip(){
+  if (!items.length) return;
+  $("zip").disabled = true;
+  const zip = new JSZip();
+  for (let i = 0; i < items.length; i++) {
+    say("กำลังประมวลผล " + (i + 1) + "/" + items.length + "…");
+    await new Promise(r => setTimeout(r, 15));
+    const {blob, ext} = await exportFull(items[i]);
+    zip.file((i + 1) + "-" + items[i].name + "-FAH." + ext, blob);
+  }
+  say("กำลังรวมไฟล์…");
+  const out = await zip.generateAsync({type:"blob", compression:"STORE"});
+  const ok = await save("FAH-photos.zip", out);
+  say(ok ? "บันทึกแล้ว ✓" : "");
+  $("zip").disabled = !items.length;
+}
+let mt; function say(t){ $("msg").textContent = t; clearTimeout(mt); if (t) mt = setTimeout(() => $("msg").textContent = "", 6000); }
+
+/* ---------- build UI ---------- */
+PRESETS.forEach(p => {
+  const b = document.createElement("button"); b.className = "pr" + (p.id === preset ? " on" : ""); b.dataset.id = p.id;
+  b.innerHTML = '<i style="background:' + p.g + '"></i>' + p.n;
+  b.onclick = () => { preset = p.id; document.querySelectorAll(".pr").forEach(x => x.classList.toggle("on", x === b)); renderAll(); };
+  $("presets").append(b);
+});
+SL.forEach(([key, name, lo, hi]) => {
+  const r = document.createElement("div"); r.className = "row";
+  r.innerHTML = '<span>' + name + '</span><input type="range" min="' + lo + '" max="' + hi + '" value="0"><output>0</output>';
+  const inp = r.querySelector("input"), out = r.querySelector("output");
+  inp.oninput = () => { manual[key] = +inp.value; out.textContent = inp.value; renderAll(); };
+  r.dataset.k = key; $("sliders").append(r);
+});
+$("resetM").onclick = () => { manual = {e:0,c:0,s:0,w:0,t:0,f:0}; document.querySelectorAll("#sliders .row").forEach(r => { r.querySelector("input").value = 0; r.querySelector("output").textContent = 0; }); renderAll(); };
+QUICK.forEach(q => {
+  const b = document.createElement("button"); b.className = "chip"; b.textContent = q;
+  b.onclick = () => { const t = $("txt"); t.value = (t.value ? t.value + " " : "") + q; t.dispatchEvent(new Event("input")); };
+  $("quick").append(b);
+});
+let tt; $("txt").addEventListener("input", () => { clearTimeout(tt); tt = setTimeout(() => { parseText($("txt").value); renderAll(); }, 200); });
+$("k").oninput = e => { k = e.target.value / 100; $("kv").textContent = e.target.value + "%"; renderAll(); };
+["wmOn","wmSize","wmOp"].forEach(id => $(id).addEventListener("input", () => { $("wmOpts").style.opacity = $("wmOn").checked ? 1 : .4; renderAll(); }));
+$("wmFont").onchange = async () => { await fontReady(); renderAll(); };
+$("file").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+const dz = $("drop");
+["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("over"); }));
+dz.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+$("clear").onclick = () => { items.forEach(i => i.bmp.close && i.bmp.close()); items = []; $("grid").innerHTML = ""; refreshUI(); say("พร้อมรอบใหม่ ✓"); };
+$("zip").onclick = saveZip;
+["fxB","fxS","fxP"].forEach(id => { const el = $(id); el.oninput = () => { el.nextElementSibling.textContent = el.value; renderAll(); }; });
+const MODES = [["view","ดูต้นฉบับ (กดค้าง)","กดค้างที่รูปเพื่อดูต้นฉบับ"],["wm","ย้ายลายน้ำ","ลากบนรูปเพื่อวางลายน้ำ ใช้ตำแหน่งเดียวกันทุกรูป"],["focus","ย้ายจุดโฟกัส","ลากบนรูปไปที่ตัวคน (ต้องติ๊ก “โฟกัสคน” ด้านบนก่อน) ตั้งแยกแต่ละรูปได้"]];
+function setMode(m){ mode = m; $("grid").classList.toggle("drag", m !== "view"); document.querySelectorAll("#modes .chip").forEach(b => b.classList.toggle("on", b.dataset.m === m)); $("modeHint").textContent = MODES.find(x => x[0] === m)[2]; renderAll(); }
+MODES.forEach(([m, n]) => { const b = document.createElement("button"); b.className = "chip"; b.dataset.m = m; b.textContent = n; b.onclick = () => setMode(m); $("modes").append(b); });
+setMode("view");
+$("fxOn").addEventListener("change", () => { if ($("fxOn").checked) setMode("focus"); else if (mode === "focus") setMode("view"); else renderAll(); });
+[["ซ้ายบน",.12,.07],["ขวาบน",.88,.07],["กลางล่าง",.5,.93],["ซ้ายล่าง",.12,.93],["ขวาล่าง",.88,.93]].forEach(([n, x, y]) => { const b = document.createElement("button"); b.className = "chip"; b.textContent = n; b.onclick = () => { wmX = x; wmY = y; renderAll(); }; $("wmPos").append(b); });
+let vurls = [], vfiles = [];
+function updShare(){ const b = $("share"); b.hidden = !(vfiles.length === items.length && vfiles.length && navigator.canShare && navigator.canShare({files: vfiles})); }
+$("share").onclick = async () => { try { await navigator.share({files: vfiles}); } catch (e) { if (e.name !== "AbortError") $("share").textContent = "เมนูแชร์ใช้ไม่ได้ ให้แตะรูปค้างแทน"; } };
+async function peek(){
+  if (!items.length) return;
+  const v = $("viewer"), list = $("vlist"); list.innerHTML = ""; vfiles = []; $("share").hidden = true; $("share").textContent = "📲 บันทึกทุกรูปลงอัลบั้ม"; v.hidden = false; document.body.style.overflow = "hidden";
+  for (let i = 0; i < items.length; i++) {
+    const ph = document.createElement("div"); ph.className = "empty"; ph.textContent = "กำลังประมวลผลรูป " + (i + 1) + "/" + items.length + "…"; list.append(ph);
+    await new Promise(r => setTimeout(r, 15));
+    if (v.hidden) return;
+    const {blob, ext} = await exportFull(items[i]);
+    if (v.hidden) return;
+    const img = new Image(), u = URL.createObjectURL(blob); vurls.push(u);
+    img.alt = items[i].name + "-FAH." + ext; img.src = u; vfiles.push(new File([blob], img.alt, {type: blob.type}));
+    img.onerror = () => { const fr = new FileReader(); fr.onload = () => { img.onerror = null; img.src = fr.result; }; fr.readAsDataURL(blob); };
+    ph.replaceWith(img); updShare();
+  }
+}
+$("peek").onclick = peek;
+$("vclose").onclick = () => { $("viewer").hidden = true; vfiles = []; document.body.style.overflow = ""; $("vlist").innerHTML = ""; vurls.forEach(u => URL.revokeObjectURL(u)); vurls = []; };
+fontReady().then(renderAll);
+refreshUI();
+
+try { if (window.claude && claude.use) claude.use("downloads").then(d => { dl = d; }).catch(() => {}); } catch (e) {}
+</script>
+</body>
+</html>
